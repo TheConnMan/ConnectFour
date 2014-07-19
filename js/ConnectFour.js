@@ -18,13 +18,27 @@ function connectFour(id) {
 	
 	var slots = svg.selectAll('.slots').data(cData).enter().append('circle').attr('class', 'slots')
 		.attr('r', function(d) { return d.r; }).attr('cx', function(d) { return d.x + margin.left; })
-		.attr('cy', function(d) { return d.y + margin.top; }).on('click', function(d) { console.log(d); });
+		.attr('cy', function(d) { return d.y + margin.top; });
 	
 	var sData = {r: r, pos: 0};
 	
-	var selector = svg.append('circle').attr('class', 'selector').attr('r', sData.r)
+	var selector = svg.append('circle').attr('class', 'slots selector').attr('r', sData.r)
 		.attr('cx', margin.left + (.5 + sData.pos) * boardW / 7).attr('cy', margin.top)
 		.style('fill', 'steelblue');
+	
+	var aiScale = d3.scale.linear().range(['red', '#BBB', 'green']);
+	
+	var aiData = d3.range(7).map(function(d) {
+		return {w: r * 2, h: r, x: (.5 + d) * boardW / 7 - r, y: boardH * 6 / 7 + r + 5, i: d};
+	});
+	
+	var ai = svg.selectAll('.ai').data(aiData).enter().append('rect').attr('width', function(d) { return d.w; })
+		.attr('height', function(d) { return d.h; }).attr('transform', function(d) { return 'translate(' + (margin.left + d.x) + ',' + (margin.top + d.y) + ')'; })
+		.style('fill', '#BBB');
+	
+	var aiText = svg.selectAll('.aiText').data(aiData).enter().append('text').attr('class', 'aiText')
+		.attr('transform', function(d) { return 'translate(' + (margin.left + d.x + d.w / 2) + ',' + (margin.top + d.y + d.h / 2 + 7.5) + ')'; })
+		.text('0');
 	
 	$(document).keydown(function(e) {
 	    if (e.keyCode == 37) { 
@@ -54,13 +68,13 @@ function connectFour(id) {
 				gameEnd(true);
 			} else {
 				setTimeout(function() {
-					var comp = computerMove(b);
+					var comp = computerMoveAI(b);
 					b[comp.r][comp.c] = -1;
-					updateBoard(comp.r * 7 + comp.c, -1);
+					updateBoard((5 - comp.r) * 7 + comp.c, -1);
 					if (checkWin(b, comp.r, comp.c, -1)) {
 						gameEnd(false);
 					}
-				}, 300)
+				}, delay)
 			}
 		} else {
 			console.log('Invalid')
@@ -82,36 +96,131 @@ function connectFour(id) {
 		     dismissmodalclass: 'close'
 		});
 	}
+
+	function computerMoveAI(b) {
+		var next = winNextTurn(b, true), block = winNextTurn(b, false), moves;
+		if (next != -1) {
+			moves = d3.range(7).map(function(d) { return d == next ? 1 : 0});
+		} else if (block != -1) {
+			moves = d3.range(7).map(function(d) { return d == block ? 1 : 0});
+		} else {
+			moves = recursiveMoves(b, 1, -1, 0, .4, 3, 0, false);
+		}
+		updateAI(moves);
+		var top = moves.map(function(d, i) { return {i: i, d: d}; }).filter(function(d) { return d.d == d3.max(moves); });
+		var c = top[Math.floor(Math.random() * top.length)].i;
+		return {r: getRow(c, b), c: c};
+	}
+	
+	function updateAI(moves) {
+		var e = d3.extent(moves)
+		aiScale.domain([e[0], 0, e[1]]);
+		ai.transition().duration(delay).style('fill', function(d) { return aiScale(moves[d.i]); });
+		aiText.text(function(d) { return Math.floor(moves[d.i] * 100) / 100; })
+	}
 }
 
-function computerMove(b) {
+function computerMoveBasic(b) {
 	var c = Math.floor(Math.random() * 7);
 	if (validMove(c, b)) {
-		return {r: 5 - getRow(c, b), c: c};
+		return {r: getRow(c, b), c: c};
 	} else {
 		return computerMove(b);
 	}
 }
 
-function checkWin(b, r, c, val) {
-	return checkVert(b, r, c, val) || checkHor(b, r, c, val) || checkDiagUpRight(b, r, c, val) || checkDiagDownRight(b, r, c, val);
+/**
+ * Checks if any move will win next turn.
+ * @param b - Board
+ * @param isComp - Boolean if the current user is the computer
+ * @returns {Number} - Returns winning column if there is one, else -1
+ */
+function winNextTurn(b, isComp) {
+	var result = -1;
+	d3.range(7).forEach(function(c) {
+		if (validMove(c, b)) {
+			var temp = $.extend(true, [], b), r = getRow(c, temp);
+			temp[r][c] = isComp ? -1 : 1;
+			if (checkWin(temp, r, c, isComp ? -1 : 1)) {
+				result = c;
+			}
+		}
+	});
+	return result;
 }
 
-function checkVert(b, r, c, val) {
+function recursiveMoves(b, win, lose, tie, mult, depth, cur, isComp) {
+	return d3.range(7).map(function(c) {
+		if (validMove(c, b)) {
+			var temp = $.extend(true, [], b), r = getRow(c, temp);
+			temp[r][c] = -1;
+			return recursiveCheck(temp, win, lose, tie, mult, depth, cur, isComp);
+		} else {
+			return -1000;
+		}
+	});
+}
+
+function recursiveCheck(b, win, lose, tie, mult, depth, cur, isComp) {
+	return d3.sum(d3.range(7).map(function(c) {
+		if (validMove(c, b)) {
+			var temp = $.extend(true, [], b), r = getRow(c, temp);
+			temp[r][c] = isComp ? -1 : 1;
+			if (checkWin(temp, r, c)) {
+				return isComp ? win : lose;
+			} else {
+				if (cur == depth) {
+					return tie;
+				} else {
+					return recursiveCheck(temp, win, lose, tie, mult, depth, cur + 1, !isComp)
+				}
+			}
+		} else {
+			return 0;
+		}
+	})) * mult;
+}
+
+/**
+ * Checks if the latest move won the game.
+ * @param b - Board
+ * @param r - Last move row
+ * @param c - Last move column
+ * @returns {Boolean}
+ */
+function checkWin(b, r, c) {
+	return checkVert(b, r, c) || checkHor(b, r, c) || checkDiagUpRight(b, r, c) || checkDiagDownRight(b, r, c);
+}
+
+/**
+ * Checks to see if the latest move has won vertically
+ * @param b - Board
+ * @param r - Last move row
+ * @param c - Last move column
+ * @returns {Boolean}
+ */
+function checkVert(b, r, c) {
 	if (r > 2) {
 		return false;
 	} else {
-		return b[r + 1][c] == val && b[r + 2][c] == val && b[r + 3][c] == val;
+		return b[r + 1][c] == b[r][c] && b[r + 2][c] == b[r][c] && b[r + 3][c] == b[r][c];
 	}
 }
 
-function checkHor(b, r, c, val) {
+/**
+ * Checks to see if the latest move has won horizontally
+ * @param b - Board
+ * @param r - Last move row
+ * @param c - Last move column
+ * @returns {Boolean}
+ */
+function checkHor(b, r, c) {
 	var count = 0;
 	var i = Math.max(0, c - 3);
 	while (i < 7) {
-		count = b[r][i] == val ? count + 1 : 0;
+		count = b[r][i] == b[r][c] ? count + 1 : 0;
 		if (count == 4) {
-			console.log('Hor')
+			//console.log('Hor')
 			return true;
 		} else {
 			i++;
@@ -120,13 +229,20 @@ function checkHor(b, r, c, val) {
 	return false;
 }
 
-function checkDiagUpRight(b, r, c, val) {
+/**
+ * Checks to see if the latest move has won diagonally up and to the right
+ * @param b - Board
+ * @param r - Last move row
+ * @param c - Last move column
+ * @returns {Boolean}
+ */
+function checkDiagUpRight(b, r, c) {
 	var delta = Math.max(r - Math.min(r + 4, 5), Math.max(c - 4, 0) - c);
 	var count = 0;
 	while (r - delta >= 0 && c + delta <= 6) {
-		count = b[r - delta][c + delta] == val ? count + 1 : 0;
+		count = b[r - delta][c + delta] == b[r][c] ? count + 1 : 0;
 		if (count == 4) {
-			console.log('UpRight')
+			//console.log('UpRight')
 			return true;
 		} else {
 			delta++;
@@ -135,13 +251,20 @@ function checkDiagUpRight(b, r, c, val) {
 	return false;
 }
 
-function checkDiagDownRight(b, r, c, val) {
+/**
+ * Checks to see if the latest move has won diagonally down and to the right
+ * @param b - Board
+ * @param r - Last move row
+ * @param c - Last move column
+ * @returns {Boolean}
+ */
+function checkDiagDownRight(b, r, c) {
 	var delta = Math.max(Math.max(r - 4, 0) - r, Math.max(c - 4, 0) - c);
 	var count = 0;
 	while (r + delta <= 5 && c + delta <= 6) {
-		count = b[r + delta][c + delta] == val ? count + 1 : 0;
+		count = b[r + delta][c + delta] == b[r][c] ? count + 1 : 0;
 		if (count == 4) {
-			console.log('DownRight')
+			//console.log('DownRight')
 			return true;
 		} else {
 			delta++;
@@ -150,6 +273,11 @@ function checkDiagDownRight(b, r, c, val) {
 	return false;
 }
 
+/**
+ * Converts the UI board into a 2d array
+ * @param data - Data from D3 UI
+ * @returns {Array}
+ */
 function convertBoard(data) {
 	return d3.range(6).map(function(r) {
 		return d3.range(7).map(function(c) {
@@ -158,10 +286,22 @@ function convertBoard(data) {
 	});
 }
 
+/**
+ * Checks if a move is valid
+ * @param move - Proposed column
+ * @param board - Board
+ * @returns {Boolean}
+ */
 function validMove(move, board) {
 	return board[0][move] == 0;
 }
 
+/**
+ * Gets the row a valid move will drop to.
+ * @param move - Column piece is dropped
+ * @param board - Board
+ * @returns {Number}
+ */
 function getRow(move, board) {
 	var r = 5;
 	while (board[r][move] != 0) {
@@ -170,6 +310,11 @@ function getRow(move, board) {
 	return r;
 }
 
+/**
+ * Outputs a 2d representation of the board into a string.
+ * @param a - Board
+ * @returns
+ */
 function toString(a) {
 	return a.map(function(d) { return d.join(','); }).join('\n');
 }

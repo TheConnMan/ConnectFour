@@ -10,3 +10,11 @@
 	stroke-width: 1;
 	stroke: black;
 }
+
+/* AI */
+
+.aiText {
+	fill: white;
+	text-anchor: middle;
+	font-size: 24px;
+}
