@@ -1,0 +1,12 @@
+#content {
+	width: 95%;
+	max-width: 1400px;
+}
+
+/* Slots */
+
+.slots {
+	fill: white;
+	stroke-width: 1;
+	stroke: black;
+}

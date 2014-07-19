@@ -2,6 +2,7 @@
 <html>
     <head>
 		<link href="./css/theconnman.css" type="text/css" rel="stylesheet" />
+		<link href="./css/reveal.css" type="text/css" rel="stylesheet" />
 		<link href="./css/ConnectFour.css" type="text/css" rel="stylesheet" />
 		<link href="//fonts.googleapis.com/css?family=Lato:100italic,100,300italic,300,400italic,400,700italic,700,900italic,900" rel="stylesheet" type="text/css">
         <title>Connect Four</title>
@@ -9,6 +10,7 @@
     <body>
         <script src="./js/jquery-2.1.0.min.js"></script>
         <script src="./js/d3.v3.min.js" charset="utf-8"></script>
+        <script src="./js/jquery.reveal.js" charset="utf-8"></script>
         <script src="./js/ConnectFour.js" charset="utf-8"></script>
         <script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
         <script>
@@ -26,6 +28,10 @@
 				<p>
 					
 				</p>
+				<div id="game"></div>
+			</div>
+	        <div id="gameEnd" class="reveal-modal">
+			     <div id="modalContent"></div>
 			</div>
 			<div id="footer">
 				Created by Brian Conn. Contact me at <a href="mailto:brian@theconnman.com">brian@theconnman.com</a> or see more at <a href="/">theconnman.com</a>.
