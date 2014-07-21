@@ -6,8 +6,9 @@ $(function() {
 
 function connectFour(id) {
 	var w = $(id).width(), done = false;
-	var boardW = 600, boardH = 600, r = 30;
+	var boardW = 600, boardH = 600, r = 35;
 	var margin = {top: 50, left: Math.max(w - boardW, 0) / 2, right: Math.max(w - boardW, 0) / 2, bottom: 50};
+	d3.select(id).selectAll('svg').remove();
 	var svg = d3.select(id).append('svg').attr('width', w).attr('height', boardH + margin.top + margin.bottom);
 	
 	var scale = d3.scale.quantize().domain([-1, 0, 1]).range(['red', 'none', 'steelblue']);
@@ -104,7 +105,7 @@ function connectFour(id) {
 		} else if (block != -1) {
 			moves = d3.range(7).map(function(d) { return d == block ? 1 : 0});
 		} else {
-			moves = recursiveMoves(b, 1, -1, 0, .4, 3, 0, false);
+			moves = recursiveMoves(b, $('#win').val(), $('#lose').val(), $('#tie').val(), $('#mult').val(), 4, 0, false);
 		}
 		updateAI(moves);
 		var top = moves.map(function(d, i) { return {i: i, d: d}; }).filter(function(d) { return d.d == d3.max(moves); });
@@ -114,7 +115,7 @@ function connectFour(id) {
 	
 	function updateAI(moves) {
 		var e = d3.extent(moves)
-		aiScale.domain([e[0], 0, e[1]]);
+		aiScale.domain([e[0], (e[0] + e[1]) / 2, e[1]]);
 		ai.transition().duration(delay).style('fill', function(d) { return aiScale(moves[d.i]); });
 		aiText.text(function(d) { return Math.floor(moves[d.i] * 100) / 100; })
 	}
@@ -139,7 +140,7 @@ function winNextTurn(b, isComp) {
 	var result = -1;
 	d3.range(7).forEach(function(c) {
 		if (validMove(c, b)) {
-			var temp = $.extend(true, [], b), r = getRow(c, temp);
+			var temp = copyArray(b), r = getRow(c, temp);
 			temp[r][c] = isComp ? -1 : 1;
 			if (checkWin(temp, r, c, isComp ? -1 : 1)) {
 				result = c;
@@ -152,7 +153,7 @@ function winNextTurn(b, isComp) {
 function recursiveMoves(b, win, lose, tie, mult, depth, cur, isComp) {
 	return d3.range(7).map(function(c) {
 		if (validMove(c, b)) {
-			var temp = $.extend(true, [], b), r = getRow(c, temp);
+			var temp = copyArray(b), r = getRow(c, temp);
 			temp[r][c] = -1;
 			return recursiveCheck(temp, win, lose, tie, mult, depth, cur, isComp);
 		} else {
@@ -164,7 +165,7 @@ function recursiveMoves(b, win, lose, tie, mult, depth, cur, isComp) {
 function recursiveCheck(b, win, lose, tie, mult, depth, cur, isComp) {
 	return d3.sum(d3.range(7).map(function(c) {
 		if (validMove(c, b)) {
-			var temp = $.extend(true, [], b), r = getRow(c, temp);
+			var temp = copyArray(b), r = getRow(c, temp);
 			temp[r][c] = isComp ? -1 : 1;
 			if (checkWin(temp, r, c)) {
 				return isComp ? win : lose;
@@ -308,6 +309,15 @@ function getRow(move, board) {
 		r--;
 	}
 	return r;
+}
+
+/**
+ * Deep copies a 2d array.
+ * @param a - Array to be copied
+ * @returns {Array}
+ */
+function copyArray(a) {
+	return a.map(function(d) { return d.slice(); });
 }
 
 /**
