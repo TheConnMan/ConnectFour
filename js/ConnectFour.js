@@ -1,10 +1,19 @@
-var transitioning = false, pad = 5, delay = 300;
+var transitioning = false, pad = 5, delay = 300, started = false;
 
 $(function() {
-	connectFour('#game')
+	connectFour('#game', true);
+	$('#aivai').change(function() {
+		if ($('#aivai').is(':checked')) {
+			$('#second').show();
+			connectFour('#game', false);
+		} else {
+			$('#second').hide();
+			connectFour('#game', true);
+		}
+	})
 });
 
-function connectFour(id) {
+function connectFour(id, user) {
 	var w = $(id).width(), done = false;
 	var boardW = 600, boardH = 600, r = 35;
 	var margin = {top: 50, left: Math.max(w - boardW, 0) / 2, right: Math.max(w - boardW, 0) / 2, bottom: 50};
@@ -23,10 +32,6 @@ function connectFour(id) {
 	
 	var sData = {r: r, pos: 0};
 	
-	var selector = svg.append('circle').attr('class', 'slots selector').attr('r', sData.r)
-		.attr('cx', margin.left + (.5 + sData.pos) * boardW / 7).attr('cy', margin.top)
-		.style('fill', 'steelblue');
-	
 	var aiScale = d3.scale.linear().range(['red', '#BBB', 'green']);
 	
 	var aiData = d3.range(7).map(function(d) {
@@ -41,22 +46,46 @@ function connectFour(id) {
 		.attr('transform', function(d) { return 'translate(' + (margin.left + d.x + d.w / 2) + ',' + (margin.top + d.y + d.h / 2 + 7.5) + ')'; })
 		.text('0');
 	
-	$(document).keydown(function(e) {
-	    if (e.keyCode == 37) { 
-	       moveSelector(-1);
-	       return false;
-	    } else if (e.keyCode == 39) { 
-	       moveSelector(1);
-	       return false;
-	    } else if (e.keyCode == 32) { 
-	       select();
-	       return false;
-	    }
-	});
+	if (user) {
+		var selector = svg.append('circle').attr('class', 'slots selector').attr('r', sData.r)
+			.attr('cx', margin.left + (.5 + sData.pos) * boardW / 7).attr('cy', margin.top)
+			.style('fill', 'steelblue');
+		$(document).keydown(function(e) {
+		    if (e.keyCode == 37) { 
+		       moveSelector(-1);
+		       return false;
+		    } else if (e.keyCode == 39) { 
+		       moveSelector(1);
+		       return false;
+		    } else if (e.keyCode == 32) { 
+		       select();
+		       return false;
+		    }
+		});
+		
+		function moveSelector(move) {
+			sData.pos = (sData.pos + move + 7) % 7;
+			selector.transition().duration(delay).attr('cx', margin.left + (.5 + sData.pos) * boardW / 7);
+		}
+	} else {
+		d3.select('#start').on('click', function() {
+			var b = convertBoard(cData);
+			aiPlay(b, d3.sum(b, function(r) { return d3.sum(r); }) == 0)
+		});
+	}
 	
-	function moveSelector(move) {
-		sData.pos = (sData.pos + move + 7) % 7;
-		selector.transition().duration(delay).attr('cx', margin.left + (.5 + sData.pos) * boardW / 7);
+	function aiPlay(b, first) {
+		var val = first ? 1 : -1;
+		var comp = first ? computerMoveAI(b, $('#win').val(), $('#lose').val(), $('#tie').val(), $('#mult').val(), $('#depth').val()) : computerMoveAI(b, $('#win2').val(), $('#lose2').val(), $('#tie2').val(), $('#mult2').val(), $('#depth2').val());
+		b[comp.r][comp.c] = val;
+		updateBoard((5 - comp.r) * 7 + comp.c, val);
+		if (checkWin(b, comp.r, comp.c, val)) {
+			done = true;
+		} else if ($('#auto').is(':checked')) {
+			setTimeout(function() {
+				aiPlay(b, !first)
+			}, delay)
+		}
 	}
 	
 	function select() {
@@ -69,7 +98,7 @@ function connectFour(id) {
 				gameEnd(true);
 			} else {
 				setTimeout(function() {
-					var comp = computerMoveAI(b);
+					var comp = computerMoveAI(b, $('#win').val(), $('#lose').val(), $('#tie').val(), $('#mult').val(), $('#depth').val());
 					b[comp.r][comp.c] = -1;
 					updateBoard((5 - comp.r) * 7 + comp.c, -1);
 					if (checkWin(b, comp.r, comp.c, -1)) {
@@ -98,14 +127,14 @@ function connectFour(id) {
 		});
 	}
 
-	function computerMoveAI(b) {
+	function computerMoveAI(b, win, lose, tie, mult, depth) {
 		var next = winNextTurn(b, true), block = winNextTurn(b, false), moves;
 		if (next != -1) {
 			moves = d3.range(7).map(function(d) { return d == next ? 1 : 0});
 		} else if (block != -1) {
 			moves = d3.range(7).map(function(d) { return d == block ? 1 : 0});
 		} else {
-			moves = recursiveMoves(b, $('#win').val(), $('#lose').val(), $('#tie').val(), $('#mult').val(), 4, 0, false);
+			moves = recursiveMoves(b, win, lose, tie, mult, depth, 0, false);
 		}
 		updateAI(moves);
 		var top = moves.map(function(d, i) { return {i: i, d: d}; }).filter(function(d) { return d.d == d3.max(moves); });

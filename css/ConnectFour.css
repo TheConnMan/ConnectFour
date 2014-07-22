@@ -1,6 +1,14 @@
+input {
+	width: 50px;
+}
+
 #content {
 	width: 95%;
 	max-width: 1400px;
+}
+
+#second {
+	display: none;
 }
 
 /* Slots */
