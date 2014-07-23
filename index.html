@@ -35,7 +35,7 @@
 				<span>Win Points:</span><input type="number" id="win" value="1" />
 				<span>Lost Points:</span><input type="number" id="lose" value="-1" />
 				<span>Tie Points:</span><input type="number" id="tie" value="0" />
-				<span>Depth Multiplier:</span><input type="number" id="mult" value=".4" min="0" max="1" />
+				<span>Depth Multiplier (tenths):</span><input type="number" id="mult" value="4" min="0" max="10" />
 				<span>Depth:</span><input type="number" id="depth" value="4" min="0" max="5" />
 				<button onclick="connectFour('#game', !$('#aivai').is(':checked'))">Reset</button>
 				<span>AI vs AI:</span><input id='aivai' type='checkbox'>
@@ -43,7 +43,7 @@
 					<span>Win Points:</span><input type="number" id="win2" value="1" />
 					<span>Lost Points:</span><input type="number" id="lose2" value="-1" />
 					<span>Tie Points:</span><input type="number" id="tie2" value="0" />
-					<span>Depth Multiplier:</span><input type="number" id="mult2" value=".1" min="0" max="1" />
+					<span>Depth Multiplier (tenths):</span><input type="number" id="mult2" value="1" min="0" max="10" />
 					<span>Depth:</span><input type="number" id="depth2" value="3" min="0" max="5" />
 					<button id="start">Start</button>
 					<span>Auto Play:</span><input id='auto' type='checkbox' checked>

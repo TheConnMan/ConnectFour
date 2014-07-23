@@ -76,7 +76,7 @@ function connectFour(id, user) {
 	
 	function aiPlay(b, first) {
 		var val = first ? 1 : -1;
-		var comp = first ? computerMoveAI(b, $('#win').val(), $('#lose').val(), $('#tie').val(), $('#mult').val(), $('#depth').val()) : computerMoveAI(b, $('#win2').val(), $('#lose2').val(), $('#tie2').val(), $('#mult2').val(), $('#depth2').val());
+		var comp = first ? computerMoveAI(b, $('#win').val(), $('#lose').val(), $('#tie').val(), $('#mult').val() / 10, $('#depth').val()) : computerMoveAI(b, $('#win2').val(), $('#lose2').val(), $('#tie2').val(), $('#mult2').val() / 10, $('#depth2').val());
 		b[comp.r][comp.c] = val;
 		updateBoard((5 - comp.r) * 7 + comp.c, val);
 		if (checkWin(b, comp.r, comp.c, val)) {
@@ -98,7 +98,7 @@ function connectFour(id, user) {
 				gameEnd(true);
 			} else {
 				setTimeout(function() {
-					var comp = computerMoveAI(b, $('#win').val(), $('#lose').val(), $('#tie').val(), $('#mult').val(), $('#depth').val());
+					var comp = computerMoveAI(b, $('#win').val(), $('#lose').val(), $('#tie').val(), $('#mult').val() / 10, $('#depth').val());
 					b[comp.r][comp.c] = -1;
 					updateBoard((5 - comp.r) * 7 + comp.c, -1);
 					if (checkWin(b, comp.r, comp.c, -1)) {
@@ -145,8 +145,8 @@ function connectFour(id, user) {
 	function updateAI(moves) {
 		var e = d3.extent(moves)
 		aiScale.domain([e[0], (e[0] + e[1]) / 2, e[1]]);
-		ai.transition().duration(delay).style('fill', function(d) { return aiScale(moves[d.i]); });
-		aiText.text(function(d) { return Math.floor(moves[d.i] * 100) / 100; })
+		ai.transition().duration(delay).style('fill', function(d) { return moves[d.i] != null ? aiScale(moves[d.i]) : 'black'; });
+		aiText.text(function(d) { return moves[d.i] != null ? Math.floor(moves[d.i] * 100) / 100: 0; })
 	}
 }
 
@@ -186,7 +186,7 @@ function recursiveMoves(b, win, lose, tie, mult, depth, cur, isComp) {
 			temp[r][c] = -1;
 			return recursiveCheck(temp, win, lose, tie, mult, depth, cur, isComp);
 		} else {
-			return -1000;
+			return null;
 		}
 	});
 }
