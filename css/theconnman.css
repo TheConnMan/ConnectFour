@@ -1,6 +1,14 @@
-a:link {color: #0C4A77;}
-a:visited {color: #555555;}
-a:hover {color: #EF7519;}
+a:link {
+	color: #0C4A77;
+}
+
+a:visited {
+	color: #555555;
+}
+
+a:hover {
+	color: #EF7519;
+}
 
 body {
 	text-align: center;
@@ -89,6 +97,7 @@ p {
 	line-height: 1.5em;
 }
 
+
 /* Images */
 
 .leftImg {
@@ -99,62 +108,73 @@ p {
 	float: right;
 }
 
+
 /* Menu */
 
 #menuHeader {
 	background-color: #555555;
 	height: 40px;
 }
-#menu,
-#menu ul {
-    list-style: none;
-    display: inline;
+
+#menu, #menu ul {
+	list-style: none;
+	display: inline;
 }
+
 #menu > li {
-    float: left;
+	float: left;
 }
+
 #menu li a {
-    display: block;
-    height: 40px;
-    line-height: 3em;
-    padding: 0 1em;
-    text-decoration: none;
-    
+	display: block;
+	height: 40px;
+	line-height: 3em;
+	padding: 0 1em;
+	text-decoration: none;
 }
+
 #menu ul {
-    position: absolute;
-    display: none;
-    z-index: 999;
+	position: absolute;
+	display: none;
+	z-index: 999;
 }
+
 #menu ul li a {
-    width: 100px;
-    float: left;
+	width: 100px;
+	float: left;
 }
+
 #menu li:hover ul {
-    display: block;
+	display: block;
 }
+
 #menu {
-    font-family: Arial;
-    font-size: 14px;
-    background-color: #555555;
-}
-#menu > li > a {
-    color: white;
-    font-weight: bold;
+	font-family: Arial;
+	font-size: 14px;
 	background-color: #555555;
 }
+
+#menu > li > a {
+	color: white;
+	font-weight: bold;
+	background-color: #555555;
+}
+
 #menu > li:hover > a {
-    background: #1794EE;
-    color: #000;
+	background: #1794EE;
+	color: #000;
 }
+
 #menu ul {
-    background: #1794EE;
+	background: #1794EE;
 }
+
 #menu ul li a {
-    color: #000;
+	color: #000;
 }
+
 #menu ul li:hover a {
-    background: #37B4FF;
+	background: #37B4FF;
 }
 
 #menu ul li {
