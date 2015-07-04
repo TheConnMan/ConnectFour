@@ -1,7 +1,4 @@
-var transitioning = false,
-	pad = 5,
-	delay = 300,
-	started = false;
+var delay = 300;
 
 $(function() {
 	connectFour('#game', true);
@@ -13,7 +10,7 @@ $(function() {
 			$('#second').hide();
 			connectFour('#game', true);
 		}
-	})
+	});
 });
 
 function connectFour(id, user) {
@@ -36,7 +33,7 @@ function connectFour(id, user) {
 	var cData = d3.range(42).map(function(d) {
 		return {
 			r: r,
-			x: (.5 + d % 7) * boardW / 7,
+			x: (0.5 + d % 7) * boardW / 7,
 			y: boardH - (Math.floor(d / 7) + 1) * boardH / 7,
 			id: d,
 			val: 0
@@ -64,7 +61,7 @@ function connectFour(id, user) {
 		return {
 			w: r * 2,
 			h: r,
-			x: (.5 + d) * boardW / 7 - r,
+			x: (0.5 + d) * boardW / 7 - r,
 			y: boardH * 6 / 7 + r + 5,
 			i: d
 		};
@@ -88,16 +85,16 @@ function connectFour(id, user) {
 
 	if (user) {
 		var selector = svg.append('circle').attr('class', 'slots selector').attr('r', sData.r)
-			.attr('cx', margin.left + (.5 + sData.pos) * boardW / 7).attr('cy', margin.top)
+			.attr('cx', margin.left + (0.5 + sData.pos) * boardW / 7).attr('cy', margin.top)
 			.style('fill', 'steelblue');
 		$(document).keydown(function(e) {
-			if (e.keyCode == 37) {
+			if (e.keyCode === 37) {
 				moveSelector(-1);
 				return false;
-			} else if (e.keyCode == 39) {
+			} else if (e.keyCode === 39) {
 				moveSelector(1);
 				return false;
-			} else if (e.keyCode == 32) {
+			} else if (e.keyCode === 32) {
 				select();
 				return false;
 			}
@@ -105,14 +102,14 @@ function connectFour(id, user) {
 
 		function moveSelector(move) {
 			sData.pos = (sData.pos + move + 7) % 7;
-			selector.transition().duration(delay).attr('cx', margin.left + (.5 + sData.pos) * boardW / 7);
+			selector.transition().duration(delay).attr('cx', margin.left + (0.5 + sData.pos) * boardW / 7);
 		}
 	} else {
 		d3.select('#start').on('click', function() {
 			var b = convertBoard(cData);
 			aiPlay(b, d3.sum(b, function(r) {
 				return d3.sum(r);
-			}) == 0)
+			}) === 0);
 		});
 	}
 
@@ -125,8 +122,8 @@ function connectFour(id, user) {
 			done = true;
 		} else if ($('#auto').is(':checked')) {
 			setTimeout(function() {
-				aiPlay(b, !first)
-			}, delay)
+				aiPlay(b, !first);
+			}, delay);
 		}
 	}
 
@@ -146,20 +143,20 @@ function connectFour(id, user) {
 					if (checkWin(b, comp.r, comp.c, -1)) {
 						gameEnd(false);
 					}
-				}, delay)
+				}, delay);
 			}
 		} else {
-			console.log('Invalid')
+			console.log('Invalid');
 		}
 	}
 
 	function updateBoard(id, val) {
 		cData.filter(function(d) {
-			return d.id == id;
+			return d.id === id;
 		})[0].val = val;
 		slots.data(cData).transition().duration(delay).style('fill', function(d) {
 			return scale(d.val);
-		})
+		});
 	}
 
 	function gameEnd(win) {
@@ -177,13 +174,13 @@ function connectFour(id, user) {
 		var next = winNextTurn(b, true),
 			block = winNextTurn(b, false),
 			moves;
-		if (next != -1) {
+		if (next !== -1) {
 			moves = d3.range(7).map(function(d) {
-				return d == next ? 1 : 0
+				return d === next ? 1 : 0;
 			});
-		} else if (block != -1) {
+		} else if (block !== -1) {
 			moves = d3.range(7).map(function(d) {
-				return d == block ? 1 : 0
+				return d === block ? 1 : 0;
 			});
 		} else {
 			moves = recursiveMoves(b, win, lose, tie, mult, depth, 0, false);
@@ -195,7 +192,7 @@ function connectFour(id, user) {
 				d: d
 			};
 		}).filter(function(d) {
-			return d.d == d3.max(moves);
+			return d.d === d3.max(moves);
 		});
 		var c = top[Math.floor(Math.random() * top.length)].i;
 		return {
@@ -205,26 +202,14 @@ function connectFour(id, user) {
 	}
 
 	function updateAI(moves) {
-		var e = d3.extent(moves)
+		var e = d3.extent(moves);
 		aiScale.domain([e[0], (e[0] + e[1]) / 2, e[1]]);
 		ai.transition().duration(delay).style('fill', function(d) {
-			return moves[d.i] != null ? aiScale(moves[d.i]) : 'black';
+			return moves[d.i] !== null ? aiScale(moves[d.i]) : 'black';
 		});
 		aiText.text(function(d) {
-			return moves[d.i] != null ? Math.floor(moves[d.i] * 100) / 100 : 0;
-		})
-	}
-}
-
-function computerMoveBasic(b) {
-	var c = Math.floor(Math.random() * 7);
-	if (validMove(c, b)) {
-		return {
-			r: getRow(c, b),
-			c: c
-		};
-	} else {
-		return computerMove(b);
+			return moves[d.i] !== null ? Math.floor(moves[d.i] * 100) / 100 : 0;
+		});
 	}
 }
 
@@ -271,10 +256,10 @@ function recursiveCheck(b, win, lose, tie, mult, depth, cur, isComp) {
 			if (checkWin(temp, r, c)) {
 				return isComp ? win : lose;
 			} else {
-				if (cur == depth) {
+				if (cur === depth) {
 					return tie;
 				} else {
-					return recursiveCheck(temp, win, lose, tie, mult, depth, cur + 1, !isComp)
+					return recursiveCheck(temp, win, lose, tie, mult, depth, cur + 1, !isComp);
 				}
 			}
 		} else {
@@ -305,7 +290,7 @@ function checkVert(b, r, c) {
 	if (r > 2) {
 		return false;
 	} else {
-		return b[r + 1][c] == b[r][c] && b[r + 2][c] == b[r][c] && b[r + 3][c] == b[r][c];
+		return b[r + 1][c] === b[r][c] && b[r + 2][c] === b[r][c] && b[r + 3][c] === b[r][c];
 	}
 }
 
@@ -320,8 +305,8 @@ function checkHor(b, r, c) {
 	var count = 0;
 	var i = Math.max(0, c - 3);
 	while (i < 7) {
-		count = b[r][i] == b[r][c] ? count + 1 : 0;
-		if (count == 4) {
+		count = b[r][i] === b[r][c] ? count + 1 : 0;
+		if (count === 4) {
 			//console.log('Hor')
 			return true;
 		} else {
@@ -342,8 +327,8 @@ function checkDiagUpRight(b, r, c) {
 	var delta = Math.max(r - Math.min(r + 4, 5), Math.max(c - 4, 0) - c);
 	var count = 0;
 	while (r - delta >= 0 && c + delta <= 6) {
-		count = b[r - delta][c + delta] == b[r][c] ? count + 1 : 0;
-		if (count == 4) {
+		count = b[r - delta][c + delta] === b[r][c] ? count + 1 : 0;
+		if (count === 4) {
 			//console.log('UpRight')
 			return true;
 		} else {
@@ -364,8 +349,8 @@ function checkDiagDownRight(b, r, c) {
 	var delta = Math.max(Math.max(r - 4, 0) - r, Math.max(c - 4, 0) - c);
 	var count = 0;
 	while (r + delta <= 5 && c + delta <= 6) {
-		count = b[r + delta][c + delta] == b[r][c] ? count + 1 : 0;
-		if (count == 4) {
+		count = b[r + delta][c + delta] === b[r][c] ? count + 1 : 0;
+		if (count === 4) {
 			//console.log('DownRight')
 			return true;
 		} else {
@@ -384,9 +369,9 @@ function convertBoard(data) {
 	return d3.range(6).map(function(r) {
 		return d3.range(7).map(function(c) {
 			return data.filter(function(d) {
-				return d.id == (5 - r) * 7 + c;
+				return d.id === (5 - r) * 7 + c;
 			})[0].val;
-		})
+		});
 	});
 }
 
@@ -397,7 +382,7 @@ function convertBoard(data) {
  * @returns {Boolean}
  */
 function validMove(move, board) {
-	return board[0][move] == 0;
+	return board[0][move] === 0;
 }
 
 /**
@@ -408,7 +393,7 @@ function validMove(move, board) {
  */
 function getRow(move, board) {
 	var r = 5;
-	while (board[r][move] != 0) {
+	while (board[r][move] !== 0) {
 		r--;
 	}
 	return r;
@@ -423,15 +408,4 @@ function copyArray(a) {
 	return a.map(function(d) {
 		return d.slice();
 	});
-}
-
-/**
- * Outputs a 2d representation of the board into a string.
- * @param a - Board
- * @returns
- */
-function toString(a) {
-	return a.map(function(d) {
-		return d.join(',');
-	}).join('\n');
 }
