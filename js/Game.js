@@ -20,6 +20,10 @@ function Game(options) {
 	this.initializeData();
 	this.initializeAIViz();
 	this.initializeAI();
+	var me = this;
+	$('input').change(function() {
+		me.initializeAI();
+	});
 }
 
 Game.prototype.initializeSvg = function() {
