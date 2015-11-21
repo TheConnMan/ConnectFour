@@ -37,9 +37,8 @@ Board.prototype.checkWin = function(row, column) {
 Board.prototype.checkVert = function(row, col) {
 	if (row > 2) {
 		return false;
-	} else {
-		return this.board[row + 1][col] === this.board[row][col] && this.board[row + 2][col] === this.board[row][col] && this.board[row + 3][col] === this.board[row][col];
 	}
+	return this.board[row + 1][col] === this.board[row][col] && this.board[row + 2][col] === this.board[row][col] && this.board[row + 3][col] === this.board[row][col];
 };
 
 Board.prototype.checkHor = function(row, col) {
@@ -49,9 +48,8 @@ Board.prototype.checkHor = function(row, col) {
 		count = this.board[row][i] === this.board[row][col] ? count + 1 : 0;
 		if (count === 4) {
 			return true;
-		} else {
-			i++;
 		}
+		i++;
 	}
 	return false;
 };
@@ -63,9 +61,8 @@ Board.prototype.checkDiagUpRight = function(row, col) {
 		count = this.board[row - delta][col + delta] === this.board[row][col] ? count + 1 : 0;
 		if (count === 4) {
 			return true;
-		} else {
-			delta++;
 		}
+		delta++;
 	}
 	return false;
 };
@@ -77,9 +74,8 @@ Board.prototype.checkDiagDownRight = function(row, col) {
 		count = this.board[row + delta][col + delta] === this.board[row][col] ? count + 1 : 0;
 		if (count === 4) {
 			return true;
-		} else {
-			delta++;
 		}
+		delta++;
 	}
 	return false;
 };
