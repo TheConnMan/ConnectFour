@@ -81,7 +81,9 @@ Board.prototype.checkDiagDownRight = function(row, col) {
 };
 
 Board.prototype.copyArray = function(dataArray) {
-	return dataArray.map(function(d) {
-		return d.slice();
-	});
+	var newArray = [];
+	for (var i = 0; i < dataArray.length; i++) {
+		newArray[i] = dataArray[i].slice();
+	}
+	return newArray;
 };
