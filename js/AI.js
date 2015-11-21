@@ -74,22 +74,18 @@ AI.prototype.recursiveMoves = function(board, currentDepth, isAIsTurn) {
 
 AI.prototype.recursiveCheck = function(board, currentDepth, isAIsTurn) {
 	var me = this;
-	return d3.sum(d3.range(7).map(function(col) {
+	var score = 0;
+	for (var col = 0; col < 7; col++) {
 		if (board.isValidMove(col)) {
 			var temp = board.clone();
 			var row = temp.getRow(col);
 			temp.board[row][col] = isAIsTurn ? -1 : 1;
 			if (temp.checkWin(row, col)) {
-				return isAIsTurn ? me.options.win : me.options.lose;
+				score += isAIsTurn ? me.options.win : me.options.lose;
 			} else {
-				if (currentDepth === me.options.depth) {
-					return me.options.tie;
-				} else {
-					return me.recursiveCheck(temp, currentDepth + 1, !isAIsTurn);
-				}
+				score += currentDepth === me.options.depth ? me.options.tie : me.recursiveCheck(temp, currentDepth + 1, !isAIsTurn);
 			}
-		} else {
-			return 0;
 		}
-	})) * me.options.multiplier;
+	}
+	return score * me.options.multiplier;
 };
