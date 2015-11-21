@@ -91,6 +91,7 @@
 	"globals": {
 		"d3": true,
 		"Board": true,
-		"Game": true
+		"Game": true,
+		"AI": true
 	} // additional predefined global variables
 }

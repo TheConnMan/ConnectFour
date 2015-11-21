@@ -19,6 +19,7 @@ function Game(options) {
 	this.initializeSvg();
 	this.initializeData();
 	this.initializeAIViz();
+	this.initializeAI();
 }
 
 Game.prototype.initializeSvg = function() {
@@ -81,6 +82,17 @@ Game.prototype.initializeAIViz = function() {
 		.text('0');
 };
 
+Game.prototype.initializeAI = function() {
+	var aiOptions = {
+		win: parseInt($('#win').val()),
+		lose: parseInt($('#lose').val()),
+		tie: parseInt($('#tie').val()),
+		multiplier: parseInt($('#mult').val()) / 10,
+		depth: parseInt($('#depth').val())
+	};
+	this.ai = new AI(aiOptions, this);
+};
+
 Game.prototype.initUser = function() {
 	var me = this;
 	this.selector = me.svg.append('circle').attr('class', 'slots selector').attr('r', me.sData.r)
@@ -117,7 +129,7 @@ Game.prototype.select = function() {
 			me.gameEnd(true);
 		} else {
 			setTimeout(function() {
-				var comp = computerMoveAI(board, $('#win').val(), $('#lose').val(), $('#tie').val(), $('#mult').val() / 10, parseInt($('#depth').val()));
+				var comp = me.ai.move(board);
 				board.board[comp.r][comp.c] = -1;
 				me.updateBoard((5 - comp.r) * 7 + comp.c, -1);
 				if (board.checkWin(comp.r, comp.c, -1)) {
@@ -160,6 +172,18 @@ Game.prototype.updateBoard = function(id, value) {
 	})[0].val = value;
 	this.slots.data(me.cData).transition().duration(me.options.delay).style('fill', function(d) {
 		return me.scale(d.val);
+	});
+};
+
+Game.prototype.updateAI = function(moves) {
+	var me = this;
+	var e = d3.extent(moves);
+	me.aiScale.domain([e[0], (e[0] + e[1]) / 2, e[1]]);
+	me.aiRectangles.transition().duration(me.options.delay).style('fill', function(d) {
+		return moves[d.i] !== null ? me.aiScale(moves[d.i]) : 'black';
+	});
+	me.aiText.text(function(d) {
+		return moves[d.i] !== null ? Math.floor(moves[d.i] * 100) / 100 : 0;
 	});
 };
 
