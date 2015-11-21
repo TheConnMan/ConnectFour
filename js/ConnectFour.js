@@ -115,7 +115,7 @@ function connectFour(id, user) {
 
 	function aiPlay(b, first) {
 		var val = first ? 1 : -1;
-		var comp = first ? computerMoveAI(b, $('#win').val(), $('#lose').val(), $('#tie').val(), $('#mult').val() / 10, $('#depth').val()) : computerMoveAI(b, $('#win2').val(), $('#lose2').val(), $('#tie2').val(), $('#mult2').val() / 10, $('#depth2').val());
+		var comp = first ? computerMoveAI(b, $('#win').val(), $('#lose').val(), $('#tie').val(), $('#mult').val() / 10, parseInt($('#depth').val())) : computerMoveAI(b, $('#win2').val(), $('#lose2').val(), $('#tie2').val(), $('#mult2').val() / 10, parseInt($('#depth2').val()));
 		b[comp.r][comp.c] = val;
 		updateBoard((5 - comp.r) * 7 + comp.c, val);
 		if (checkWin(b, comp.r, comp.c, val)) {
@@ -137,7 +137,7 @@ function connectFour(id, user) {
 				gameEnd(true);
 			} else {
 				setTimeout(function() {
-					var comp = computerMoveAI(b, $('#win').val(), $('#lose').val(), $('#tie').val(), $('#mult').val() / 10, $('#depth').val());
+					var comp = computerMoveAI(b, $('#win').val(), $('#lose').val(), $('#tie').val(), $('#mult').val() / 10, parseInt($('#depth').val()));
 					b[comp.r][comp.c] = -1;
 					updateBoard((5 - comp.r) * 7 + comp.c, -1);
 					if (checkWin(b, comp.r, comp.c, -1)) {
