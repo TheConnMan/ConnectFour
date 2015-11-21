@@ -143,20 +143,32 @@ Game.prototype.select = function() {
 Game.prototype.initAIvAI = function() {
 	var me = this;
 	d3.select('#start').on('click', function() {
-		var b = me.convertBoard(me.cData);
-		me.aiPlay(b, d3.sum(b, function(r) {
-			return d3.sum(r);
-		}) === 0);
+		me.board = new Board(me.cData);
+		me.aiPlay(true);
 	});
 };
 
 Game.prototype.aiPlay = function(isFirst) {
+	var aiOptions = isFirst ? {
+		win: parseInt($('#win').val()),
+		lose: parseInt($('#lose').val()),
+		tie: parseInt($('#tie').val()),
+		multiplier: parseInt($('#mult').val()) / 10,
+		depth: parseInt($('#depth').val())
+	} : {
+		win: parseInt($('#win2').val()),
+		lose: parseInt($('#lose2').val()),
+		tie: parseInt($('#tie2').val()),
+		multiplier: parseInt($('#mult2').val()) / 10,
+		depth: parseInt($('#depth2').val())
+	};
+	var ai = new AI(aiOptions, this);
 	var me = this;
 	var val = isFirst ? 1 : -1;
-	var comp = isFirst ? computerMoveAI(me.board, $('#win').val(), $('#lose').val(), $('#tie').val(), $('#mult').val() / 10, parseInt($('#depth').val())) : computerMoveAI(me.board, $('#win2').val(), $('#lose2').val(), $('#tie2').val(), $('#mult2').val() / 10, parseInt($('#depth2').val()));
-	me.board[comp.r][comp.c] = val;
+	var comp = ai.move(me.board);
+	me.board.board[comp.r][comp.c] = val;
 	me.updateBoard((5 - comp.r) * 7 + comp.c, val);
-	if (me.checkWin(comp.r, comp.c, val)) {
+	if (me.board.checkWin(comp.r, comp.c, val)) {
 		me.done = true;
 	} else if ($('#auto').is(':checked')) {
 		setTimeout(function() {
