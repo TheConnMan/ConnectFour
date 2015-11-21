@@ -29,7 +29,7 @@ function Game(options) {
 Game.prototype.initializeSvg = function() {
 	d3.select(this.options.selector).selectAll('svg').remove();
 	this.svg = d3.select(this.options.selector).append('svg').attr('width', this.divWidth).attr('height', this.options.board.height + this.options.margin.top + this.options.margin.bottom);
-	this.scale = d3.scale.quantize().domain([-1, 0, 1]).range(['red', 'none', 'steelblue']);
+	this.scale = d3.scale.quantize().domain([-1, 0, 1]).range(['red', 'white', 'steelblue']);
 	this.aiScale = d3.scale.linear().range(['red', '#BBB', 'green']);
 };
 
