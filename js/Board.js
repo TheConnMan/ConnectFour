@@ -6,7 +6,7 @@ Board.prototype.clone = function() {
 	var newBoard = new Board();
 	newBoard.board = this.copyArray(this.board);
 	return newBoard;
-}
+};
 
 Board.prototype.convertBoard = function(data) {
 	return d3.range(6).map(function(r) {
