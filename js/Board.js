@@ -23,9 +23,8 @@ Board.prototype.isValidMove = function(move) {
 };
 
 Board.prototype.getRow = function(move) {
-	var me = this;
 	var r = 5;
-	while (me.board[r][move] !== 0) {
+	while (this.board[r][move] !== 0) {
 		r--;
 	}
 	return r;

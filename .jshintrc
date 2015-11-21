@@ -89,6 +89,8 @@
 
 	// Custom Globals
 	"globals": {
-		"d3": true
+		"d3": true,
+		"Board": true,
+		"Game": true
 	} // additional predefined global variables
 }

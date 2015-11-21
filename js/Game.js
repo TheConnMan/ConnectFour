@@ -155,10 +155,10 @@ Game.prototype.aiPlay = function(isFirst) {
 
 Game.prototype.updateBoard = function(id, value) {
 	var me = this;
-	me.cData.filter(function(d) {
+	this.cData.filter(function(d) {
 		return d.id === id;
 	})[0].val = value;
-	me.slots.data(me.cData).transition().duration(me.options.delay).style('fill', function(d) {
+	this.slots.data(me.cData).transition().duration(me.options.delay).style('fill', function(d) {
 		return me.scale(d.val);
 	});
 };
